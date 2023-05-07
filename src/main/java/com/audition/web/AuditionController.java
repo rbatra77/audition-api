@@ -37,9 +37,12 @@ public class AuditionController {
         //We would leverage the filtering feature of backend as it already supports this.
         //So we don't have to duplicate the functionality.
 
+        Optional<Integer> sanitisedUserId = null != userId ? Optional.of(userId) : Optional.empty();
+
+        //The below cleans HTML tags. We don't have any sql DB as such
+        //But depending on org standards, we can further sanitise it for SQL queries etc.
         Optional<String> sanitisedTitle =
             null != title ? Optional.of(Jsoup.clean(title, Safelist.none())) : Optional.empty();
-        Optional<Integer> sanitisedUserId = null != userId ? Optional.of(userId) : Optional.empty();
 
         return auditionService.getPosts(sanitisedUserId, sanitisedTitle);
     }

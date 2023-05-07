@@ -4,12 +4,16 @@ import com.audition.common.exception.SystemException;
 import com.audition.configuration.AppConfig;
 import com.audition.model.AuditionPost;
 import com.audition.model.Comment;
+import com.audition.web.advice.ExceptionControllerAdvice;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -19,13 +23,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class AuditionIntegrationClient {
 
-    /**
-     * We could have used Circuit breaker to handle downstream issues. But unable to do this due to time constraints.
-     */
-
     private AppConfig config;
     private RestTemplate restTemplate;
 
+    @CircuitBreaker(name = "backend", fallbackMethod = "fallbackPosts")
     public List<AuditionPost> getPosts(final Optional<Integer> userId, final Optional<String> title) {
         // TODO make RestTemplate call to get Posts from https://jsonplaceholder.typicode.com/posts
 
@@ -46,6 +47,7 @@ public class AuditionIntegrationClient {
 
     }
 
+    @CircuitBreaker(name = "backend", fallbackMethod = "fallbackPost")
     public AuditionPost getPostById(final Integer id) {
         // TODO get post by post ID call from https://jsonplaceholder.typicode.com/posts/
         try {
@@ -69,6 +71,7 @@ public class AuditionIntegrationClient {
 
     // TODO write a method. GET comments for a particular Post from https://jsonplaceholder.typicode.com/comments?postId={postId}.
     // The comments are a separate list that needs to be returned to the API consumers. Hint: this is not part of the AuditionPost pojo.
+    @CircuitBreaker(name = "backend", fallbackMethod = "fallbackComments")
     public List<Comment> getComments(final Optional<Integer> postId) {
 
         try {
@@ -111,5 +114,26 @@ public class AuditionIntegrationClient {
 
     public RestTemplate getRestTemplate() {
         return restTemplate;
+    }
+
+    public List<Comment> fallbackComments(Exception e) {
+        fallbackThrow(e);
+        return new ArrayList<>();
+    }
+
+    public AuditionPost fallbackPost(Exception e) {
+        fallbackThrow(e);
+        return null;
+    }
+
+    public List<AuditionPost> fallbackPosts(Exception e) {
+        fallbackThrow(e);
+        return new ArrayList<>();
+    }
+
+    public void fallbackThrow(Exception e) {
+        throw new SystemException(e.getMessage(), ExceptionControllerAdvice.DOWNSTREAM_UNAVAILABLE,
+            HttpStatus.SERVICE_UNAVAILABLE.value(), e);
+
     }
 }

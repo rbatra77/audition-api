@@ -2,11 +2,13 @@ package com.audition.web.advice;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 import com.audition.common.exception.SystemException;
 import com.audition.common.logging.AuditionLogger;
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.ConstraintViolationException;
+import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 
     public static final String DEFAULT_TITLE = "API Error Occurred";
+
+    public static final String DOWNSTREAM_UNAVAILABLE = "Downstream Service Unavailable";
 
     public static final String CONSTRAINT_VIOLATION_OCCURRED = "Constraint violation occurred";
     private static final Logger LOG = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
@@ -41,6 +45,18 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
     ProblemDetail handleMainException(final Exception e) {
         // TODO Add handling for Exception
         return createProblemDetail(INTERNAL_SERVER_ERROR, DEFAULT_TITLE, e);
+
+    }
+
+    @ExceptionHandler(CompletionException.class)
+    ProblemDetail handleCompletionException(final CompletionException e) {
+        
+        if (e.getMessage().contains(SystemException.class.getName())) {
+            //That means raised by Circuit Breaker
+            return createProblemDetail(SERVICE_UNAVAILABLE, DOWNSTREAM_UNAVAILABLE, e);
+        } else {
+            return createProblemDetail(INTERNAL_SERVER_ERROR, DEFAULT_TITLE, e);
+        }
 
     }
 
