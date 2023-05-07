@@ -36,6 +36,7 @@ ext {
     set('slf4jVersion', "2.0.5")
     set('springdocVersion', "2.0.2")
     set('hibernateValidatorVersion', "8.0.0.Final")
+    set('jsoupVersion', "1.14.2")
 }
 
 dependencies {
@@ -55,6 +56,7 @@ dependencies {
     implementation "org.springframework.cloud:spring-cloud-starter-config"
 //    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
     implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
+    implementation "org.jsoup:jsoup:${jsoupVersion}"
 
     developmentOnly "org.springframework.boot:spring-boot-devtools"
 //    runtimeOnly "io.micrometer:micrometer-registry-prometheus"

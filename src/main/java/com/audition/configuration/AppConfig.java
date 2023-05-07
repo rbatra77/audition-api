@@ -18,5 +18,6 @@ public class AppConfig {
     private String auditionCommentsSuffix;
     private String auditionCommentsFilter;
     private String auditionUserIdFilter;
-    
+    private String auditionTitleFilter;
+
 }

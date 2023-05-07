@@ -40,5 +40,6 @@ app:
     auditionBaseUri: "https://jsonplaceholder.typicode.com"
     auditionPostsSuffix: "/posts/"
     auditionCommentsSuffix: "/comments"
-    auditionCommentsFilter: "?postId="
-    auditionUserIdFilter: "?userId="
+    auditionCommentsFilter: "postId"
+    auditionUserIdFilter: "userId"
+    auditionTitleFilter: "title"

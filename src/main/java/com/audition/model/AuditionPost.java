@@ -17,4 +17,9 @@ public class AuditionPost {
 
     private List<Comment> comments;
 
+    public AuditionPost saveComments(List<Comment> comments) {
+        this.comments = comments;
+        return this;
+    }
+
 }
